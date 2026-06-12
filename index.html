@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KOŚCIÓŁ TV PRO</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial,sans-serif;
+    padding:20px;
+}
+
+h1{
+    color:white;
+}
+
+textarea{
+    width:100%;
+    height:350px;
+    background:#000;
+    color:white;
+    border:2px solid white;
+    border-radius:10px;
+    padding:15px;
+    font-size:22px;
+    resize:vertical;
+}
+
+.controls{
+    margin-top:15px;
+}
+
+button{
+    padding:12px 18px;
+    margin:4px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.main{
+    background:white;
+    color:black;
+    font-weight:bold;
+}
+
+.secondary{
+    background:#333;
+    color:white;
+}
+
+#info{
+    margin-top:15px;
+    font-size:20px;
+}
+
+</style>
+</head>
+<body>
+
+<h1>KOŚCIÓŁ TV PRO</h1>
+
+<textarea id="tekst" placeholder="Podwójny Enter = nowy slajd"></textarea>
+
+<div class="controls">
+
+<button class="main" onclick="otworzTV()">📺 Otwórz TV</button>
+<button class="main" onclick="wyslij()">🚀 Wyślij na TV</button>
+
+<br>
+
+<button class="secondary" onclick="wstecz()">◀ Wstecz</button>
+<button class="secondary" onclick="dalej()">▶ Dalej</button>
+
+<button class="secondary" onclick="odslon()">⬇ Odsłoń</button>
+<button class="secondary" onclick="zaslon()">⬆ Zasuń</button>
+
+<button class="secondary" onclick="wyczysc()">❌ Wyczyść</button>
+
+<button class="secondary" onclick="trybCzarny()">🌙 Czarny</button>
+<button class="secondary" onclick="trybBialy()">☀ Biały</button>
+
+</div>
+
+<div id="info">
+Slajd: 0 / 0
+</div>
+
+<script>
+
+let tv = null;
+let slajdy = [];
+let aktualny = 0;
+
+function otworzTV(){
+
+    if(tv && !tv.closed){
+        tv.focus();
+        return;
+    }
+
+    tv = window.open(
+        "",
+        "KosciolTV",
+        "width=1920,height=1080,left=100,top=50"
+    );
+
+    tv.document.write(`
+
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>TV</title>
+
+<style>
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:black;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#tekst{
+    width:90%;
+    text-align:center;
+    color:white;
+    font-size:72px;
+    line-height:1.4;
+    white-space:pre-line;
+
+    opacity:1;
+    transform:translateY(0);
+
+    transition:
+        opacity .4s ease,
+        transform .4s ease;
+}
+
+#roleta{
+    position:fixed;
+    inset:0;
+    background:white;
+    z-index:9999;
+
+    transform:translateY(0);
+
+    transition:
+        transform 1s ease;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="roleta"></div>
+
+<div id="tekst"></div>
+
+</body>
+</html>
+
+`);
+
+    tv.document.close();
+}
+
+function przygotujSlajdy(){
+
+    slajdy = document
+    .getElementById("tekst")
+    .value
+    .split(/\n\s*\n/)
+    .filter(x => x.trim() !== "");
+
+    aktualny = 0;
+}
+
+function pokazSlajd(){
+
+    if(!tv || tv.closed) return;
+
+    if(slajdy.length === 0) return;
+
+    const el = tv.document.getElementById("tekst");
+
+    el.style.opacity = "0";
+    el.style.transform = "translateY(30px)";
+
+    setTimeout(() => {
+
+        el.innerText = slajdy[aktualny];
+
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0px)";
+
+    }, 400);
+
+    document.getElementById("info").innerText =
+    "Slajd: " +
+    (aktualny + 1) +
+    " / " +
+    slajdy.length;
+}
+
+function wyslij(){
+    przygotujSlajdy();
+    pokazSlajd();
+}
+
+function dalej(){
+
+    if(aktualny < slajdy.length - 1){
+
+        aktualny++;
+        pokazSlajd();
+    }
+}
+
+function wstecz(){
+
+    if(aktualny > 0){
+
+        aktualny--;
+        pokazSlajd();
+    }
+}
+
+function odslon(){
+
+    if(!tv || tv.closed) return;
+
+    tv.document
+      .getElementById("roleta")
+      .style.transform = "translateY(-100%)";
+}
+
+function zaslon(){
+
+    if(!tv || tv.closed) return;
+
+    tv.document
+      .getElementById("roleta")
+      .style.transform = "translateY(0)";
+}
+
+function wyczysc(){
+
+    if(!tv || tv.closed) return;
+
+    tv.document
+      .getElementById("tekst")
+      .innerHTML = "";
+}
+
+function trybCzarny(){
+
+    if(!tv || tv.closed) return;
+
+    tv.document.body.style.background = "black";
+
+    tv.document
+      .getElementById("tekst")
+      .style.color = "white";
+}
+
+function trybBialy(){
+
+    if(!tv || tv.closed) return;
+
+    tv.document.body.style.background = "white";
+
+    tv.document
+      .getElementById("tekst")
+      .style.color = "black";
+}
+
+document.addEventListener("keydown", function(e){
+
+    if(e.key === "ArrowRight"){
+        dalej();
+    }
+
+    if(e.key === "ArrowLeft"){
+        wstecz();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
